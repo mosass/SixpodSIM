@@ -22,6 +22,3 @@ traj = mstraj(seg(:,2:4), [], seg(:,1)', seg(1,2:4), 0.01, 0.01);
 for i = 1:M
     robot.animate(traj(i, :));
 end
-
-
-

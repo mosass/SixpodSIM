@@ -9,7 +9,7 @@ classdef hexapod < handle
         
         LEG_BASE_X = 15.75;
         LEG_BASE_Y = 4.375;
-        LEG_BASE_Z = 7.5;
+        LEG_BASE_Z = 10.0;
         
         LEG_INIT_FT = [0 13.1 0];
         
@@ -81,6 +81,23 @@ classdef hexapod < handle
             
             r = [alpha beta gramma];
         end
+        
+        function r = traj2wavegait(traj, offset)
+            max = length(traj);
+            idx = [1, 2, 3, 4 ,5 ,6] .* offset;
+            for i = 1:max
+                r{i} = [
+                    traj{idx(1)}(1,:);
+                    traj{idx(2)}(2,:);
+                    traj{idx(3)}(3,:);
+                    traj{idx(4)}(4,:);
+                    traj{idx(5)}(5,:);
+                    traj{idx(6)}(6,:);
+                ];
+                
+                idx = mod(idx, max) + 1;
+            end
+        end
     end
     
 	methods        
@@ -128,10 +145,44 @@ classdef hexapod < handle
         end
         
         function animate(obj, ft)
+            obj.footTipsPos = ft;
             for i = 1:6
-                obj.footTipsPos(i,:) = ft;
-                q = obj.legIkForLeg(i)
+                q = obj.legIkForLeg(i);
                 obj.legs(i).animate(q);
+            end
+        end
+        
+        function r = pose2traj(obj, pose, dx_number, gait_dx_number, point_per_dx)
+            r = {};
+            r{1} = pose(1:6, 2:4); %%% initial position
+            n = 2;
+            N = dx_number * point_per_dx;
+            for i = n:N
+                r{i} = r{i - 1} + (pose(1:6, 5:7) ./ point_per_dx);
+            end
+            
+            gait_point = gait_dx_number * point_per_dx;
+            n_gait = gait_point / 2;
+            if mod(gait_point, 2) == 1
+                n_gait = (gait_point + 1) / 2;
+            end
+            
+            mid_pose = (r{1} + r{N}) ./ 2.0;
+            diff = r{1} - r{N};
+            mid_pose(1:6, 3) = sqrt((sum(diff .^ 2, 2))) / 3.0
+            dtarj = (mid_pose - r{N}) / n_gait;
+            
+            n = N + 1;
+            N = N + n_gait;
+            for i = n:N
+                r{i} = r{i - 1} + dtarj;
+            end
+            
+            n = N + 1;
+            N = N + n_gait;
+            dtarj(1:6, 3) = - dtarj(1:6, 3);
+            for i = n:N
+                r{i} = r{i - 1} + dtarj;
             end
         end
     end
