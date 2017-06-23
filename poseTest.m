@@ -33,6 +33,15 @@ pose{3} = [
     6, 0,  8, 0, 0,  1, 0;
 ];
 
+% pose{3} = [
+%     1, 0, 15, 0, 0, -2, 0;
+%     2, 0, 15, 0, 0, -2, 0;
+%     3, 0, 15, 0, 0, -2, 0;
+%     4, 0,  5, 0, 0,  2, 0;
+%     5, 0,  5, 0, 0,  2, 0;
+%     6, 0,  5, 0, 0,  2, 0;
+% ];
+
 % R
 pose{4} = [
     1, 0,  8, 0, 0,  1, 0;
@@ -86,7 +95,7 @@ pose{8} = [
 %%% dddd
 robot = hexapod();
 robot.plot();
-x = postureSim(robot, pose{4}, 1)
+x = postureSim(robot, pose{6}, 1, 50)
 
 for i = 1:8
     writePostureToFile(i, pose{i});

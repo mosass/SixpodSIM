@@ -152,7 +152,7 @@ classdef hexapod < handle
             end
         end
         
-        function r = pose2traj(obj, pose, dx_number, gait_dx_number, point_per_dx)
+        function r = pose2traj(obj, pose, dx_number, gait_dx_number, point_per_dx, z_up)
             r = {};
             r{1} = pose(1:6, 2:4); %%% initial position
             n = 2;
@@ -167,7 +167,7 @@ classdef hexapod < handle
                 n_gait = (gait_point + 1) / 2;
             end
             
-            mid_pose = (r{1} + r{N}) ./ 2.0;
+            mid_pose = (r{1} + r{N}) .* (z_up / 100);
             diff = r{1} - r{N};
             mid_pose(1:6, 3) = sqrt((sum(diff .^ 2, 2))) / 3.0
             dtarj = (mid_pose - r{N}) / n_gait;
